@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import re
 
-from django.template import Context, loader
+from django.template import loader
 from django.utils import datetime_safe, six
 
 from haystack.exceptions import SearchFieldError
@@ -112,7 +112,8 @@ class SearchField(object):
 
             if len(attributes) > 1:
                 current_objects_in_attr = self.get_iterable_objects(getattr(current_object, attributes[0]))
-                return self.resolve_attributes_lookup(current_objects_in_attr, attributes[1:])
+                values.extend(self.resolve_attributes_lookup(current_objects_in_attr, attributes[1:]))
+                continue
 
             current_object = getattr(current_object, attributes[0])
 
@@ -244,6 +245,8 @@ class LocationField(SearchField):
         elif isinstance(value, dict):
             lat = value.get('lat', 0)
             lng = value.get('lon', 0)
+        else:
+            raise TypeError('Unable to extract coordinates from %r' % value)
 
         value = Point(float(lng), float(lat))
         return value
